@@ -1,0 +1,45 @@
+.avatar {
+  margin-right: 12px;
+}
+.avatar.user {
+  margin-left: 12px;
+  margin-right: 0;
+}
+
+.bubble {
+  max-width: calc(100% - 48px);
+  padding: 12px 18px;
+  border-radius: 18px;
+  font-size: 16px;
+  line-height: 1.7;
+  word-break: break-word;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  text-align: left;
+}
+
+.user {
+  align-self: flex-start;
+  background: #eff6ff;
+  color: #222;
+}
+
+.assistant {
+  align-self: flex-start;
+  background: #fff;
+  color: #222;
+  border: 1px solid #e0e0e0;
+}
+
+.modelTag {
+  position: absolute;
+  left: 40px;
+  bottom: -20px;
+  font-size: 12px;
+  color: #bbb;
+  background: #fff;
+  padding: 0 6px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px #eee;
+  pointer-events: none;
+  z-index: 1;
+}
