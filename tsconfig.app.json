@@ -28,7 +28,12 @@
     "paths": {
       "@/*": ["./src/*"],
       "@utils/*": ["./src/utils/*"]
-    }
+    },
+
+    "types": [
+      "vite/client",
+      "@testing-library/jest-dom" // 关键配置
+    ]
   },
-  "include": ["src"]
+  "include": ["src", "test/App.test.tsx"]
 }

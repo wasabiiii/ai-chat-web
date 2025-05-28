@@ -10,4 +10,8 @@ export default defineConfig({
       '@utils': path.resolve(__dirname, './src/utils'),
     },
   },
+  test: {
+    environment: 'jsdom',
+    setupFiles: './vitest-setup.ts', // 继承 Testing Library 断言
+  },
 });
