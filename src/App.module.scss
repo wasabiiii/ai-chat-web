@@ -1,8 +1,29 @@
-.container800 {
-  max-width: 800px;
-  margin-left: auto;
-  margin-right: auto;
-  width: 100%;
+.appContainer {
+  min-height: 100vh;
+  background: #f5f6fa;
+}
+
+.header {
+  background: #fff;
+  box-shadow: 0 2px 8px #f0f1f2;
+  padding: 0 24px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 101;
+}
+
+.headerTitle {
+  font-size: 22px;
+}
+
+.mainContainer {
+  width: 800px;
+  margin: 64px auto 0;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
 }
 
 .chatContainer {
@@ -11,10 +32,17 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-height: 300px;
+  flex-grow: 1;
+}
+
+.emptyState {
+  color: #bbb;
+  text-align: center;
+  margin-top: 80px;
 }
 
 .chatInputPanel {
-  @extend .container800;
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
@@ -72,6 +100,14 @@
   box-shadow: none;
 }
 
+.actionBar {
+  position: relative;
+  height: 40px;
+}
+
 .sendBtn {
-  margin-bottom: 6px;
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 1;
 }

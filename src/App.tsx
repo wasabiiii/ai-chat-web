@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect, FormEvent } from 'react';
-import { Input, Button, Select, Layout, Typography } from 'antd';
+import React, { useState, useRef, useEffect, FormEvent, useCallback } from 'react';
+import { Input, Button, Select, Layout, Typography, Form } from 'antd';
+import type { TextAreaRef } from 'antd/es/input/TextArea';
 import { SendOutlined, StopOutlined } from '@ant-design/icons';
 import { requestLLM } from '@utils/requestLLM';
 import MessageBubble from './components/MessageBubble/MessageBubble';
@@ -10,6 +11,7 @@ import styles from './App.module.scss';
 
 const { Header } = Layout;
 const { Text } = Typography;
+const { TextArea } = Input;
 
 // 更新最后一条消息的工具函数
 const updateLastMessage = (
@@ -37,13 +39,15 @@ const App = (): React.ReactNode => {
       return [];
     }
   });
-  const [input, setInput] = useState<string>('');
   const [selectedModel, setSelectedModel] = useState<string>(() => {
     return localStorage.getItem(SELECTED_MODEL_LOCAL_KEY) || modelList[0]?.value || 'gpt-3.5';
   });
   const [loading, setLoading] = useState<boolean>(false);
   const [abortCtrl, setAbortCtrl] = useState<AbortController | null>(null);
+  const [form] = Form.useForm();
+  const [hasInput, setHasInput] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<TextAreaRef>(null);
 
   useEffect(() => {
     if (chatRef.current) {
@@ -61,12 +65,21 @@ const App = (): React.ReactNode => {
     localStorage.setItem(SELECTED_MODEL_LOCAL_KEY, selectedModel);
   }, [selectedModel]);
 
+  // 监听输入变化
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setHasInput(!!e.target.value.trim());
+  }, []);
+
   // 发送消息
   const handleSend = async (e?: FormEvent, retryData?: RetryData) => {
-    e && e.preventDefault();
+    e?.preventDefault();
     if (loading) return;
-    const userMsg = retryData ? retryData.userInput : input;
-    if (!userMsg.trim()) return;
+
+    const userMsg = retryData ? retryData.userInput : form.getFieldValue('message');
+    if (!userMsg?.trim()) return;
+
+    // 清空输入框
+    form.resetFields();
 
     const history = retryData ? messages.slice(0, -2) : messages;
     const newMessages: Message[] = [
@@ -77,14 +90,14 @@ const App = (): React.ReactNode => {
       ...newMessages,
       { role: 'assistant', content: '正在思考…', model: selectedModel },
     ]);
-    setInput('');
+
     setLoading(true);
     const controller = new AbortController();
     setAbortCtrl(controller);
     try {
       const reply = await requestLLM(selectedModel, newMessages, { signal: controller.signal });
       setMessages((msgs) => updateLastMessage(msgs, { content: reply }, selectedModel));
-    } catch (err: any) {
+    } catch {
       if (controller.signal.aborted) {
         setMessages((msgs) =>
           updateLastMessage(
@@ -118,41 +131,34 @@ const App = (): React.ReactNode => {
     handleSend(undefined, retryData);
   };
 
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    },
+    [loading],
+  );
+
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f6fa' }}>
-      <Header
-        style={{
-          background: '#fff',
-          boxShadow: '0 2px 8px #f0f1f2',
-          padding: '0 24px',
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 101,
-        }}
-      >
-        <Text strong style={{ fontSize: 22 }}>
-          AI 聊天室
-        </Text>
+    <div className={styles.appContainer}>
+      <Header className={styles.header}>
+        <Text className={styles.headerTitle}>AI 聊天室</Text>
       </Header>
-      <div
-        style={{
-          width: '800px',
-          margin: '80px auto 0',
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: 'calc(100vh - 80px)',
-        }}
-      >
-        <div ref={chatRef} style={{ minHeight: 300, flexGrow: 1 }} className={styles.chatContainer}>
+      <div className={styles.mainContainer}>
+        <div ref={chatRef} className={styles.chatContainer}>
           {messages.length === 0 && (
-            <div style={{ color: '#bbb', textAlign: 'center', marginTop: 80 }}>
-              欢迎使用，输入内容开始对话…
-            </div>
+            <div className={styles.emptyState}>欢迎使用，输入内容开始对话…</div>
           )}
           {messages.map((msg, idx) => (
-            <MessageBubble key={idx} msg={msg} idx={idx} onRetry={handleRetry} />
+            <MessageBubble
+              key={idx}
+              msg={msg}
+              idx={idx}
+              onRetry={handleRetry}
+              isThinking={loading && idx === messages.length - 1}
+            />
           ))}
         </div>
         <div className={styles.chatInputPanel}>
@@ -164,38 +170,37 @@ const App = (): React.ReactNode => {
               options={modelList}
             />
           </div>
-          <form onSubmit={loading ? undefined : handleSend}>
-            <div className={styles.inputAreaCard}>
-              <div className={styles.inputAreaRow}>
-                <Input.TextArea
+          <div className={styles.inputAreaCard}>
+            <Form form={form}>
+              <Form.Item name="message">
+                <TextArea
+                  ref={inputRef}
                   className={styles.chatInput}
                   placeholder="请输入内容..."
-                  value={input}
-                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
-                  onPressEnter={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-                    if (!e.shiftKey && !loading) handleSend(e);
-                  }}
+                  onKeyDown={handleKeyDown}
+                  onChange={handleInputChange}
                   disabled={loading}
                   autoSize={{ minRows: 2, maxRows: 6 }}
                   style={{ background: 'transparent', boxShadow: 'none' }}
                 />
-                <Button
-                  className={styles.sendBtn}
-                  type="primary"
-                  icon={loading ? <StopOutlined /> : <SendOutlined />}
-                  htmlType="submit"
-                  loading={false}
-                  disabled={!input.trim() && !loading}
-                  onClick={loading ? handleAbort : undefined}
-                >
-                  {loading ? '中断' : '发送'}
-                </Button>
-              </div>
+              </Form.Item>
+            </Form>
+            <div className={styles.actionBar}>
+              <Button
+                className={styles.sendBtn}
+                type="primary"
+                icon={loading ? <StopOutlined /> : <SendOutlined />}
+                onClick={loading ? handleAbort : handleSend}
+                loading={false}
+                disabled={loading ? false : !hasInput}
+              >
+                {loading ? '中断' : '发送'}
+              </Button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

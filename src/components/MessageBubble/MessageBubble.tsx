@@ -9,58 +9,57 @@ import styles from './MessageBubble.module.scss';
 interface MessageBubbleProps {
   msg: Message;
   idx: number;
+  isThinking: boolean;
   onRetry: (retryData: { userInput: string }) => void;
 }
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ msg, idx, onRetry }) => {
+const MessageBubble: React.FC<MessageBubbleProps> = ({ msg, idx, isThinking, onRetry }) => {
+  const isUser = msg.role === 'user';
+
+  const renderContent = () => {
+    if (isUser) {
+      // 用户消息直接显示，保留换行
+      return <div className={styles.userContent}>{msg.content}</div>;
+    } else {
+      if (isThinking) {
+        return (
+          <span style={{ color: '#aaa' }}>
+            <Spin size="small" style={{ marginRight: 8 }} />
+            {msg.content}
+          </span>
+        );
+      }
+
+      if (msg.error) {
+        return (
+          <div className={styles.errorContent}>
+            <div>{msg.content}</div>
+            {msg.retryData && (
+              <Button
+                type="link"
+                icon={<ReloadOutlined />}
+                onClick={() => onRetry(msg.retryData!)}
+                className={styles.retryButton}
+              >
+                重试
+              </Button>
+            )}
+          </div>
+        );
+      }
+
+      return <MarkdownRenderer content={msg.content} />;
+    }
+  };
+
   return (
-    <div style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'start',
-          width: '100%',
-          marginBottom: 2,
-          flexDirection: msg.role === 'user' ? 'row-reverse' : 'row',
-        }}
-      >
-        <Avatar
-          className={msg.role === 'user' ? `${styles.avatar} ${styles.user}` : styles.avatar}
-          icon={msg.role === 'user' ? <UserOutlined /> : <RobotOutlined />}
-          style={{ background: msg.role === 'user' ? '#91d5ff' : '#ffd666', color: '#222' }}
-        />
-        <div
-          className={
-            msg.role === 'user'
-              ? `${styles.bubble} ${styles.user}`
-              : `${styles.bubble} ${styles.assistant}`
-          }
-        >
-          {msg.content === '正在思考…' ? (
-            <span style={{ color: '#aaa' }}>
-              <Spin size="small" style={{ marginRight: 8 }} />
-              {msg.content}
-            </span>
-          ) : msg.error ? (
-            <span style={{ color: '#f5222d' }}>
-              {msg.content}
-              {msg.retryData && (
-                <Button
-                  size="small"
-                  icon={<ReloadOutlined />}
-                  style={{ marginLeft: 12 }}
-                  onClick={() => onRetry(msg.retryData!)}
-                  type="link"
-                >
-                  重试
-                </Button>
-              )}
-            </span>
-          ) : (
-            <MarkdownRenderer content={msg.content} />
-          )}
-        </div>
-      </div>
+    <div className={`${styles.messageBubble} ${isUser ? styles.user : styles.assistant}`}>
+      <Avatar
+        className={styles.avatar}
+        icon={isUser ? <UserOutlined /> : <RobotOutlined />}
+        style={{ background: isUser ? '#91d5ff' : '#ffd666', color: '#222' }}
+      />
+      <div className={styles.content}>{renderContent()}</div>
       {/* 气泡外部右下角展示模型名 */}
       {msg.role === 'assistant' && (
         <div className={styles.modelTag}>

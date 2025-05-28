@@ -16,6 +16,16 @@ export async function requestLLM(
 
   if (!apiKey) throw new Error('请在环境变量中配置该模型的 API Key');
 
+  // mock start
+  if (modelInfo.label !== 'DeepSeek') {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve('这是一个模拟AI回复');
+      }, 1000);
+    });
+  }
+  // mock end
+
   const config: any = {
     headers: {
       'Authorization': `Bearer ${apiKey}`,
