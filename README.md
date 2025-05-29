@@ -1,12 +1,52 @@
-# React + Vite
+# AI CHAT
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+基于React19+Typescript+Vite+Vitest开发的AI Chat
 
-Currently, two official plugins are available:
+![Image](https://github.com/user-attachments/assets/b1c0b54f-a104-4458-a68b-d8b1a06445b1)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 功能
+- ✅ 模型切换: 支持Deepseek、GPT模型
+- ✅ 消息支持中断或重试
+- ✅ 当前会话持久化
+- ⬜ 主题切换
+- ✅ 多行编辑器
+- ⬜ 模型配置面板
+- ⬜ 响应流式显示
 
-## Expanding the ESLint configuration
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 本地开发
+node版本需要v18.8+
+
+依赖安装
+```
+npm i
+```
+
+本地开发
+```
+npm run dev
+```
+
+单元测试
+```
+npm run test
+```
+
+预览构建后的项目
+```
+npm run build:preview
+```
+
+### 目录结构
+```
+src/
+├── components/        # UI 组件
+├── contexts/         # React Context
+├── hooks/           # 自定义 Hooks
+├── utils/           # 工具函数
+├── types.ts         # 类型定义
+└── App.tsx          # 根组件
+```
+
+### 模型key配置
+.env中配置模型对应的key
