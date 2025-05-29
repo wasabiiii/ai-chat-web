@@ -11,13 +11,6 @@ export interface Message extends LLMMessage {
   content: string;
 }
 
-export interface MessageBubbleProps {
-  msg: Message;
-  idx: number;
-  isLast: boolean;
-  onRetry: (retryData: { userInput: string }) => void;
-}
-
 export interface RetryData {
   userInput: string;
 }

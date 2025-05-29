@@ -1,4 +1,6 @@
 .appContainer {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background: #f5f6fa;
 }
@@ -16,6 +18,8 @@
 
 .headerTitle {
   font-size: 22px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .mainContainer {
@@ -27,7 +31,7 @@
 }
 
 .chatContainer {
-  padding: 20px;
+  margin-top: 10px;
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -40,74 +44,4 @@
   color: #bbb;
   text-align: center;
   margin-top: 80px;
-}
-
-.chatInputPanel {
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-  padding: 18px 20px 14px 20px;
-  margin-top: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  position: sticky;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 100;
-}
-
-.inputRow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-}
-
-.modelSelect {
-  min-width: 140px;
-  background: #f7f7fa;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  font-size: 15px;
-}
-
-.inputAreaCard {
-  background: #f7f7fa;
-  border-radius: 12px;
-  border: 1px solid #e0e0e0;
-  padding: 10px 14px 0 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.inputAreaRow {
-  display: flex;
-  align-items: flex-end;
-  gap: 10px;
-}
-
-.chatInput {
-  flex: 1;
-  background: transparent;
-  border: none;
-  outline: none;
-  font-size: 16px;
-  min-height: 38px;
-  resize: none;
-  box-shadow: none;
-}
-
-.actionBar {
-  position: relative;
-  height: 40px;
-}
-
-.sendBtn {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  z-index: 1;
 }

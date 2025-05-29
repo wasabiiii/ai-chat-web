@@ -1,19 +1,17 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Avatar, Button, Spin } from 'antd';
 import { UserOutlined, RobotOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Message } from '@/types';
 import { modelList } from '@utils/constants';
-import MarkdownRenderer from '../MarkdownRenderer';
+import MarkdownRenderer from '../MarkdownRenderer/MarkdownRenderer';
 import styles from './MessageBubble.module.scss';
 
 interface MessageBubbleProps {
   msg: Message;
-  idx: number;
   isThinking: boolean;
   onRetry: (retryData: { userInput: string }) => void;
 }
-
-const MessageBubble: React.FC<MessageBubbleProps> = ({ msg, idx, isThinking, onRetry }) => {
+const MessageBubble: React.FC<MessageBubbleProps> = ({ msg, isThinking, onRetry }) => {
   const isUser = msg.role === 'user';
 
   const renderContent = () => {
@@ -59,15 +57,17 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ msg, idx, isThinking, onR
         icon={isUser ? <UserOutlined /> : <RobotOutlined />}
         style={{ background: isUser ? '#91d5ff' : '#ffd666', color: '#222' }}
       />
-      <div className={styles.content}>{renderContent()}</div>
-      {/* 气泡外部右下角展示模型名 */}
-      {msg.role === 'assistant' && (
-        <div className={styles.modelTag}>
-          {modelList.find((m) => m.value === msg.model)?.label || msg.model}
-        </div>
-      )}
+      <div className={styles.messageBubbleContent}>
+        <div className={styles.content}>{renderContent()}</div>
+        {/* 气泡外部展示模型名 */}
+        {msg.role === 'assistant' && (
+          <div className={styles.modelTag}>
+            {modelList.find((m) => m.value === msg.model)?.label || msg.model}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
 
-export default MessageBubble;
+export default memo(MessageBubble);
