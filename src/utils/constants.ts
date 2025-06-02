@@ -21,7 +21,3 @@ export const modelList = [
     key: 'VITE_KEY_DEEPSEEK',
   },
 ];
-
-export const CHAT_LOCAL_KEY = 'chat_messages';
-
-export const SELECTED_MODEL_LOCAL_KEY = 'selected_model';

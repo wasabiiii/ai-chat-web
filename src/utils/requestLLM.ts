@@ -1,12 +1,11 @@
-import request from './request';
-import { LLMMessage } from '@/types';
+import { Message } from '@/types';
 import { modelList } from '@utils/constants';
 
 export async function requestLLM(
   modelId: string,
-  messages: LLMMessage[],
+  messages: Message[],
   options: { signal?: AbortSignal },
-): Promise<string> {
+): Promise<Response> {
   const { signal } = options;
   const modelInfo = modelList.find((m) => m.value === modelId);
 
@@ -18,29 +17,35 @@ export async function requestLLM(
 
   // mock start
   if (modelInfo.label !== 'DeepSeek') {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve('这是一个模拟AI回复');
-      }, 1000);
-    });
+    const mockResponse = new Response(
+      new ReadableStream({
+        start(controller) {
+          const mockData = {
+            id: 'mock-id',
+            object: 'chat.completion.chunk',
+            created: Date.now(),
+            model: modelId,
+            choices: [{ index: 0, delta: { content: '这是一个模拟AI回复' }, finish_reason: null }],
+          };
+          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(mockData)}\n\n`));
+          controller.close();
+        },
+      }),
+      { headers: { 'Content-Type': 'text/event-stream' } },
+    );
+    return mockResponse;
   }
   // mock end
 
-  const config: any = {
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-  };
-  if (signal) config.signal = signal;
-
-  const data = await request.post(
-    modelInfo.apiUrl,
-    {
+  const data = await fetch(modelInfo.apiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+    body: JSON.stringify({
       model: modelInfo.modelName,
       messages: messages.map((m) => ({ role: m.role, content: m.content })),
-    },
-    config,
-  );
-  return data.choices?.[0]?.message?.content || 'AI无回复';
+      stream: true,
+    }),
+    signal,
+  });
+  return data;
 }

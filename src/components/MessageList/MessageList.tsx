@@ -1,16 +1,15 @@
-import React, { memo, useCallback } from 'react';
-import { Message } from '@/types';
+import React, { memo } from 'react';
+import { useChatStore } from '@/store/useChatStore';
 import MessageBubble from '../MessageBubble/MessageBubble';
+import { Message } from '@/types';
 import styles from './MessageList.module.scss';
 
-interface MessageListProps {
-  messages: Message[];
-  loading: boolean;
-  onRetry: (retryData: { userInput: string }) => void;
-}
-
-const MessageList: React.FC<MessageListProps> = ({ messages, loading, onRetry }) => {
-  const emptyRetry = useCallback(() => {}, []);
+const MessageList: React.FC = () => {
+  const messages = useChatStore((state) => {
+    const currentSessionId = state.currentSessionId;
+    if (!currentSessionId) return [] as Message[];
+    return state.sessions[currentSessionId]?.messages || [];
+  });
 
   return (
     <div className={styles.messageList}>
@@ -18,12 +17,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, loading, onRetry })
         <div className={styles.emptyState}>欢迎使用，输入内容开始对话…</div>
       )}
       {messages.map((msg, idx) => (
-        <MessageBubble
-          key={idx}
-          msg={msg}
-          onRetry={idx === messages.length - 1 ? onRetry : emptyRetry}
-          isThinking={loading && idx === messages.length - 1}
-        />
+        <MessageBubble key={msg.id || idx} msg={msg} />
       ))}
     </div>
   );

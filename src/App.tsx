@@ -1,33 +1,28 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Layout } from 'antd';
 import MessageList from './components/MessageList/MessageList';
 import ChatInput from './components/ChatInput/ChatInput';
-import { useChat } from './hooks/useChat';
-import { ModelProvider, useModel } from './contexts/ModelContext';
-import { RetryData } from '@/types';
+import { useChatStore } from '@/store/useChatStore';
 import './normalize.css';
 import styles from './App.module.scss';
 
 const { Header } = Layout;
 
 const ChatApp: React.FC = () => {
-  const { selectedModel } = useModel();
-  const { messages, loading, sendMessage, abortRequest } = useChat(selectedModel);
   const chatRef = useRef<HTMLDivElement>(null);
-
-  // 自动滚动到底部
-  useEffect(() => {
-    if (chatRef.current) {
-      chatRef.current.scrollTop = chatRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  const handleRetry = useCallback(
-    (retryData: RetryData) => {
-      sendMessage(retryData.userInput, retryData);
-    },
-    [sendMessage],
+  const createNewSession = useChatStore((state) => state.createNewSession);
+  const hasSession = useChatStore(
+    (state) => state.currentSessionId && Object.keys(state.sessions).length > 0,
   );
+
+  useEffect(() => {
+    // 只在没有会话时创建新会话
+    if (!hasSession) {
+      createNewSession();
+    }
+  }, [createNewSession, hasSession]);
+
+  console.log('ChatApp', ChatApp);
 
   return (
     <div className={styles.appContainer}>
@@ -36,9 +31,9 @@ const ChatApp: React.FC = () => {
       </Header>
       <div className={styles.mainContainer}>
         <div ref={chatRef} className={styles.chatContainer}>
-          <MessageList messages={messages} loading={loading} onRetry={handleRetry} />
+          <MessageList />
         </div>
-        <ChatInput loading={loading} onSend={sendMessage} onAbort={abortRequest} />
+        <ChatInput />
       </div>
     </div>
   );
@@ -46,11 +41,7 @@ const ChatApp: React.FC = () => {
 
 // 根组件，提供 Context
 const App = (): React.ReactNode => {
-  return (
-    <ModelProvider>
-      <ChatApp />
-    </ModelProvider>
-  );
+  return <ChatApp />;
 };
 
 export default App;

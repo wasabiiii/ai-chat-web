@@ -2,32 +2,33 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Input, Button, Select, Form } from 'antd';
 import type { TextAreaRef } from 'antd/es/input/TextArea';
 import { SendOutlined, StopOutlined } from '@ant-design/icons';
-import { modelList } from '@utils/constants';
-import { useModel } from '@/contexts/ModelContext';
+import { useChatStore } from '@/store/useChatStore';
 import styles from './ChatInput.module.scss';
 
 const { TextArea } = Input;
 
 const ModelSelect: React.FC = () => {
-  const { selectedModel, setSelectedModel } = useModel();
+  const models = useChatStore((state) => state.models);
+  const currentModel = useChatStore((state) => state.currentModel);
+  const switchModel = useChatStore((state) => state.switchModel);
 
   return (
     <Select
       className={styles.modelSelect}
-      value={selectedModel}
-      onChange={setSelectedModel}
-      options={modelList}
+      value={currentModel}
+      onChange={(value) => switchModel(value)}
+      options={models}
     />
   );
 };
 
-interface ChatInputProps {
-  loading: boolean;
-  onSend: (message: string) => void;
-  onAbort: () => void;
-}
+const ChatInput: React.FC = () => {
+  // 只订阅需要的状态和函数
+  const isGenerating = useChatStore((state) => state.isGenerating);
+  const addUserMessage = useChatStore((state) => state.addUserMessage);
+  const startAIResponse = useChatStore((state) => state.startAIResponse);
+  const abortGeneration = useChatStore((state) => state.abortGeneration);
 
-const ChatInput: React.FC<ChatInputProps> = ({ loading, onSend, onAbort }) => {
   const [form] = Form.useForm();
   const inputRef = useRef<TextAreaRef>(null);
   const [hasInput, setHasInput] = useState(false);
@@ -35,16 +36,17 @@ const ChatInput: React.FC<ChatInputProps> = ({ loading, onSend, onAbort }) => {
   const handleSubmit = useCallback(
     async (e?: React.FormEvent) => {
       e?.preventDefault();
-      if (loading) return;
+      if (isGenerating) return;
 
       const message = form.getFieldValue('message');
       if (!message?.trim()) return;
 
       form.resetFields();
       setHasInput(false);
-      await onSend(message);
+      addUserMessage(message);
+      await startAIResponse();
     },
-    [loading, form, onSend],
+    [isGenerating, form, addUserMessage, startAIResponse],
   );
 
   const handleKeyDown = useCallback(
@@ -71,7 +73,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ loading, onSend, onAbort }) => {
               placeholder="请输入内容..."
               onKeyDown={handleKeyDown}
               onChange={(e) => setHasInput(!!e.target.value.trim())}
-              disabled={loading}
+              disabled={isGenerating}
               autoSize={{ minRows: 2, maxRows: 6 }}
               style={{ background: 'transparent', boxShadow: 'none' }}
             />
@@ -81,12 +83,12 @@ const ChatInput: React.FC<ChatInputProps> = ({ loading, onSend, onAbort }) => {
           <Button
             className={styles.sendBtn}
             type="primary"
-            icon={loading ? <StopOutlined /> : <SendOutlined />}
-            onClick={loading ? onAbort : handleSubmit}
+            icon={isGenerating ? <StopOutlined /> : <SendOutlined />}
+            onClick={isGenerating ? abortGeneration : handleSubmit}
             loading={false}
-            disabled={loading ? false : !hasInput}
+            disabled={isGenerating ? false : !hasInput}
           >
-            {loading ? '中断' : '发送'}
+            {isGenerating ? '中断' : '发送'}
           </Button>
         </div>
       </div>
