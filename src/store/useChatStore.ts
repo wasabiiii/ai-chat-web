@@ -177,10 +177,15 @@ export const useChatStore = create<ChatState>()(
 
             for (const line of lines) {
               if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                // 处理 [DONE] 消息
+                if (data === '[DONE]') {
+                  continue;
+                }
                 try {
-                  const data = JSON.parse(line.slice(6));
-                  if (data.choices?.[0]?.delta?.content) {
-                    aiContent += data.choices[0].delta.content;
+                  const parsedData = JSON.parse(data);
+                  if (parsedData.choices?.[0]?.delta?.content) {
+                    aiContent += parsedData.choices[0].delta.content;
 
                     // 高效更新状态 - 只更新内容部分
                     set((state) => {
