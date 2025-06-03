@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  server: {
+    // 自动打开浏览器运行以下路径的页面
+    open: '/',
+  },
   plugins: [react()],
   resolve: {
     alias: {
