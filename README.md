@@ -11,7 +11,7 @@
 - ⬜ 主题切换
 - ✅ 多行编辑器
 - ⬜ 模型配置面板
-- ⬜ 响应流式显示
+- ✅ 响应流式显示
 
 
 ## 本地开发
@@ -41,8 +41,8 @@ npm run build:preview
 ```
 src/
 ├── components/        # UI 组件
-├── contexts/         # React Context
-├── hooks/           # 自定义 Hooks
+├── services/         # API调用
+├── store/         # store
 ├── utils/           # 工具函数
 ├── types.ts         # 类型定义
 └── App.tsx          # 根组件

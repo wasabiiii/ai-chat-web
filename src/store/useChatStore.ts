@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { ChatState, ModelConfig, Message, Session } from '@/types';
-import { requestLLM } from '@/utils/requestLLM';
+import { requestLLM } from '@/services/requestLLM';
 import { modelList } from '@/utils/constants';
 
 // 默认模型配置
