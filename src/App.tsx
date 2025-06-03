@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { Layout } from 'antd';
+import '@ant-design/v5-patch-for-react-19';
 import MessageList from './components/MessageList/MessageList';
 import ChatInput from './components/ChatInput/ChatInput';
 import { useChatStore } from '@/store/useChatStore';
@@ -21,8 +22,6 @@ const ChatApp: React.FC = () => {
       createNewSession();
     }
   }, [createNewSession, hasSession]);
-
-  console.log('ChatApp', ChatApp);
 
   return (
     <div className={styles.appContainer}>

@@ -14,6 +14,7 @@
     "build:preview": "npm run build && npm run preview"
   },
   "dependencies": {
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "antd": "^5.25.2",
     "axios": "^1.9.0",
     "react": "^19.1.0",
